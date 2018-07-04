@@ -7,6 +7,9 @@
  * Time: 11:30
  * 主要用于传入sql语句返回查询的结果，并且自动映射
  */
+namespace wlphp\DB;
+
+
 
 class DB
 {
@@ -18,7 +21,7 @@ class DB
     public  function mysqlDb()
     {
 
-        $this->mysqli = new mysqli('127.0.0.1', 'root', 'ok', 'accp2');
+        $this->mysqli = new \mysqli('127.0.0.1', 'root', 'root', 'yii_book');
 
         if ( $this->mysqli->connect_error) {
 
@@ -94,7 +97,7 @@ class DB
      * @param $sql
      * @return array
      */
-    public function  findDB($name,$sql)
+    public function  findDB($name,$sql,$namespace)
     {
         $this->mysqlDb();
 
@@ -113,6 +116,7 @@ class DB
 
         //生成数组
 //        $tempList=[];
+//
 //
 //        //外层循环控制数据
 //        foreach ($infoArr as $key=>$item)
@@ -138,7 +142,7 @@ class DB
         foreach ($infoArr as $key=>$item)
         {
 
-            $tempName=new $name();
+            $tempName=new $namespace();   //new 出来是个命名空间
             //内层循环控制列
             foreach ($colomArr as $colomItem)
             {

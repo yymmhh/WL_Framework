@@ -1,39 +1,20 @@
-<html>
-<head>
-
-    <title>123</title>
-    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-</head>
-    <body>
-
-    <ul class="list-group">
-    <?php
-
-    require_once "Model/result.php";
+<?php
 
 
-     foreach (result::all() as $item){
+$get=$_GET['c'];
+$result = explode('/', $get);
+
+$controller=$result[0];  //得到控制器
+$action=$result[1];         //得到方法
 
 
+require_once  "autoload.php";
 
-     ?>
+$namespace="\app\Controller\\$controller";
 
-         <li  class="list-group-item"><?php echo $item["StudentNo"]; ?></li>
-         <li  class="list-group-item"><?php echo $item["SubjectNo"]; ?></li>
+$namespace=$namespace."Controller";
 
-    <?php
+$con=new $namespace();
 
-     }
-
-
-    ?>
-
-
-        <?php
-        $info=new result();
-        $info->where()->select();
-        ?>
-    </ul>
-    </body>
-
-</html>
+$con->$action();
+//new \app\Controller\index();

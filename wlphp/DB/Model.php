@@ -6,13 +6,15 @@
  * Date: 2018/4/21
  * Time: 17:44
  */
+namespace wlphp\DB;
 
-require_once "DB.php";
+
 class Model
 {
 
     public static $name;
     public static $sql ="";
+    public static $namespace="";
 
 
 
@@ -37,6 +39,16 @@ class Model
         return $this;
     }
 
+    //得到类,为了到DB里面new 然后生成
+    function wl_get_class(){
+        $namespace =get_called_class();
+        $mode_Index=strrpos($namespace,'\\');
+        $name=substr( $namespace,$mode_Index+1);
+
+        self::$namespace=$namespace;
+        self::$name=$name;
+    }
+
     /**
      * Where条件
      */
@@ -57,9 +69,6 @@ class Model
 
         Model::$sql= Model::$sql .$tempConnectionSQl;
 
-
-//        var_dump( Model::$sql);
-//        die();
         return $this;
     }
 
@@ -73,18 +82,20 @@ class Model
         echo Model::$sql;
         echo "<hr>";
         $db=new DB();
-        return  $db->findDB(Model::$name,Model::$sql);
+        return  $db->findDB(Model::$name,Model::$sql,Model::$namespace);
 
     }
+
 
     /**
      * 第一步的操作
      */
     public static function all()
     {
-        $name =get_called_class();
-        $name=strtolower($name);
-        $arr= (new self())->setName($name);
+
+        self::wl_get_class();
+//
+        $arr= (new self())->setName(self::$name);
         return new Model();
     }
 
@@ -132,8 +143,11 @@ class Model
      */
     public static function create($arr)
     {
-        $name =get_called_class();
-        $name=strtolower($name);
+        self::wl_get_class();
+//
+        $name=self::$name;
+
+//        $arr= (new self())->setName(self::$name);
         $db=new DB();
         $columnArr= $db->columnDB($name);
         $columnString=implode(",",$columnArr);
@@ -155,7 +169,7 @@ class Model
         echo Model::$sql;
         echo "<hr>";
 //        die();
-        $i=  $db->createDB("create",Model::$sql);
+        $i=  $db->IntDB("create",Model::$sql);
         return $i;
     }
 
@@ -166,9 +180,9 @@ class Model
      */
     public static function find($id)
     {
-        $name =get_called_class();
-        $name=strtolower($name);
-        $arr= (new self())->setName($name);
+        self::wl_get_class();
+//
+        $arr= (new self())->setName(self::$name);
          (new self())->where(['id='=>$id]);
         $info= (new self())->get();
         return $info;
@@ -179,10 +193,11 @@ class Model
      * @param $arr
      * @return int|string
      */
-    public function update($arr)
+    public static function update($arr)
     {
-        $name =get_called_class();
-        $name=strtolower($name);
+        self::wl_get_class();
+//
+        $name=self::$name;
         $db=new DB();
         $columnArr= $db->columnDB($name);
         $columnString=implode(",",$columnArr);
@@ -210,10 +225,10 @@ class Model
         return $i;
     }
 
-    public  function delete($arr)
+    public  static function delete($arr)
     {
-        $name =get_called_class();
-        $name=strtolower($name);
+        self::wl_get_class();
+        $name=self::$name;
         $db=new DB();
 
 
