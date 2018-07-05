@@ -1,6 +1,6 @@
 # WL_Framework
 
-<h2>自己手写的一个仿造Laravel的 MC 框架没有V😂</h2>
+<h2>自己手写的一个仿造Laravel和ThinkPHP的 MC 框架没有V😂</h2>
   
 
 2018-7-4 加入命名空间.
@@ -58,3 +58,10 @@
 
             $post = User::all()->HasMany(User_Info::class, ['id', 'user_id'])->get();
             数组第一个是本模型的主键第二个是关联的模型的外键
+            
+            
+一对一
+
+            $post = User::all()->HasOne(User_Info::class, ['id', 'user_id'])->get();
+            数组第一个是本模型的主键第二个是关联的模型的外键
+            
