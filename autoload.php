@@ -22,6 +22,14 @@ function dd($arr){
 
 }
 
+function ddd($arr){
+    echo "<pre>";
+
+    var_dump($arr);
+
+    die;
+}
+
 function error($arr){
     echo "<pre>";
 

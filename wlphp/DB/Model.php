@@ -6,6 +6,7 @@
  * Date: 2018/4/21
  * Time: 17:44
  */
+
 namespace wlphp\DB;
 
 
@@ -13,56 +14,59 @@ class Model
 {
 
     public static $name;
-    public static $sql ="";
-    public static $namespace="";
-    public static $has_name="";
+    public static $sql = "";
+    public static $namespace = "";
+    public static $has_name = "";
 
-
-//    public function __construct()
-//    {
-//        $namespace =get_called_class();
-//
-//        $mode_Index=strrpos($namespace,'\\');
-//        $name=substr( $namespace,$mode_Index+1);
-//
-//        self::$namespace=$namespace;
-//        self::$name=$name;
-//        var_dump($namespace);
-//        die();
-//    }
 
     /**
      * 为sql的表给名字
      */
-    public function setName($name){
+    public function setName($name)
+    {
 
-        Model::$name=$name;
-        Model::$sql="select * from  $name where 1=1";
+        Model::$name = $name;
+        Model::$sql = "select * from  $name where 1=1";
 
         $this->lian();
 //        return $this;
     }
 
-    public function HasOne($model,$where){
+    public function HasOne($model, $where)
+    {
 
-//        self::wl_get_class();
-        $name=self::$name;
+        $name = self::$name;
 
 
+        $mode_Index = strrpos($model, '\\');
+        $has_name = substr($model, $mode_Index + 1);
+        self::$has_name = $has_name;
 
-//        echo "<br>";
-        $mode_Index=strrpos($model,'\\');
-        $has_name=substr( $model,$mode_Index+1);
-        self::$has_name=$has_name;
+        $my_parameter = $this->select_parameter($name);
+        $has_parameter = $this->select_parameter($has_name);
 
-        $my_parameter= $this->select_parameter($name);
-        $has_parameter= $this->select_parameter($has_name);
-
-        self::$sql="select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
+        self::$sql = "select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
 
         return $this;
     }
 
+
+    public function HasMany($model, $where)
+    {
+
+        $name = self::$name;
+
+        $mode_Index = strrpos($model, '\\');
+        $has_name = substr($model, $mode_Index + 1);
+        self::$has_name = $has_name;
+
+        $my_parameter = $this->select_parameter($name);
+        $has_parameter = $this->select_parameter($has_name);
+
+        self::$sql = "select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
+
+        return $this;
+    }
 
 
     //一个可有可无的连接件
@@ -73,14 +77,15 @@ class Model
     }
 
     //得到类,为了到DB里面new 然后生成
-    function wl_get_class(){
-        $namespace =get_called_class();
+    function wl_get_class()
+    {
+        $namespace = get_called_class();
 
-        $mode_Index=strrpos($namespace,'\\');
-        $name=substr( $namespace,$mode_Index+1);
+        $mode_Index = strrpos($namespace, '\\');
+        $name = substr($namespace, $mode_Index + 1);
 
-        self::$namespace=$namespace;
-        self::$name=$name;
+        self::$namespace = $namespace;
+        self::$name = $name;
 
     }
 
@@ -89,36 +94,34 @@ class Model
      */
 
 
-    public  function  where($sql)
+    public function where($sql)
     {
 
-        $tempConnectionSQl="";
+        $tempConnectionSQl = "";
 
-        foreach ($sql as $key=>$item)
-        {
-//            var_dump($key."--".$item);
-//            echo "<br>";
-            $tempConnectionSQl=$tempConnectionSQl . ' and ' .$key."'$item'";
+        foreach ($sql as $key => $item) {
+
+            $tempConnectionSQl = $tempConnectionSQl . ' and ' . $key . "'$item'";
         }
 
 
-        Model::$sql= Model::$sql .$tempConnectionSQl;
+        Model::$sql = Model::$sql . $tempConnectionSQl;
 
         return $this;
     }
 
 //得到sql 查询的列
-    public  function select_parameter($name){
-        $db=new DB();
+    public function select_parameter($name)
+    {
+        $db = new DB();
 
-        $column_arr=$db->columnDB($name);
+        $column_arr = $db->columnDB($name);
 
-        $select_can="";
-        foreach ($column_arr as $item)
-        {
-            $select_can=$select_can . " {$name}.{$item}   as '{$name}&{$item} '  , " ;
+        $select_can = "";
+        foreach ($column_arr as $item) {
+            $select_can = $select_can . " {$name}.{$item}   as '{$name}&{$item} '  , ";
         }
-        $select_parameter = substr($select_can,0,strlen($select_can)-2);
+        $select_parameter = substr($select_can, 0, strlen($select_can) - 2);
 
         return $select_parameter;
     }
@@ -127,16 +130,16 @@ class Model
     /**
      * 这个式最后的查询数据
      */
-    public  function get()
+    public function get()
     {
 
 //        echo Model::$sql;
 //        echo "<hr>";
-        $db=new DB();
-        if(self::$has_name==""){
-            return  $db->findDB(Model::$name,Model::$sql,Model::$namespace);
-        }else{
-            return  $db->findDB_has_one(Model::$name,Model::$sql,Model::$namespace,Model::$has_name);
+        $db = new DB();
+        if (self::$has_name == "") {
+            return $db->findDB(Model::$name, Model::$sql, Model::$namespace);
+        } else {
+            return $db->findDB_has_many(Model::$name, Model::$sql, Model::$namespace, Model::$has_name);
         }
 
 
@@ -152,7 +155,7 @@ class Model
         self::wl_get_class();
 //        var_dump(self::$name);
 //
-        $arr= (new self())->setName(self::$name);
+        $arr = (new self())->setName(self::$name);
         return new Model();
     }
 
@@ -162,14 +165,14 @@ class Model
      * @param string $order 查询的方法 desc 默认式升序
      * @return $this 排序
      */
-    public  function order($column,$order="")
+    public function order($column, $order = "")
     {
-        $tempConnectionSQl=Model::$sql;
+        $tempConnectionSQl = Model::$sql;
 
 
-    $tempConnectionSQl=$tempConnectionSQl ." ORDER BY $column $order";
-    Model::$sql=$tempConnectionSQl;
-    return $this;
+        $tempConnectionSQl = $tempConnectionSQl . " ORDER BY $column $order";
+        Model::$sql = $tempConnectionSQl;
+        return $this;
     }
 
 
@@ -179,14 +182,14 @@ class Model
      * @param $pageSize 每页几个
      * @return $this
      */
-    public function limt($pageIndex,$pageSize)
+    public function limt($pageIndex, $pageSize)
     {
-        $pageIndex=$pageSize*($pageIndex-1);
-        $tempConnectionSQl=Model::$sql;
+        $pageIndex = $pageSize * ($pageIndex - 1);
+        $tempConnectionSQl = Model::$sql;
 
 
-        $tempConnectionSQl=$tempConnectionSQl ." LIMIT $pageIndex , $pageSize";
-        Model::$sql=$tempConnectionSQl;
+        $tempConnectionSQl = $tempConnectionSQl . " LIMIT $pageIndex , $pageSize";
+        Model::$sql = $tempConnectionSQl;
 
         return $this;
 
@@ -202,31 +205,29 @@ class Model
     {
         self::wl_get_class();
 //
-        $name=self::$name;
+        $name = self::$name;
 
 //        $arr= (new self())->setName(self::$name);
-        $db=new DB();
-        $columnArr= $db->columnDB($name);
-        $columnString=implode(",",$columnArr);
+        $db = new DB();
+        $columnArr = $db->columnDB($name);
+        $columnString = implode(",", $columnArr);
 
 
-
-        $columnKeys="";
-        $columnVlaues="";
-        foreach ($arr as $key=>$item)
-        {
-            $columnKeys=$columnKeys .$key . ",";
-            $columnVlaues="$columnVlaues '$item'  ,";
+        $columnKeys = "";
+        $columnVlaues = "";
+        foreach ($arr as $key => $item) {
+            $columnKeys = $columnKeys . $key . ",";
+            $columnVlaues = "$columnVlaues '$item'  ,";
 
         }
-        $columnKeys=substr($columnKeys,0,strlen($columnKeys)-1);
-        $columnVlaues=substr($columnVlaues,0,strlen($columnVlaues)-1);
+        $columnKeys = substr($columnKeys, 0, strlen($columnKeys) - 1);
+        $columnVlaues = substr($columnVlaues, 0, strlen($columnVlaues) - 1);
 
-        Model::$sql="insert into $name ($columnKeys) VALUES ($columnVlaues)";
+        Model::$sql = "insert into $name ($columnKeys) VALUES ($columnVlaues)";
         echo Model::$sql;
         echo "<hr>";
 //        die();
-        $i=  $db->IntDB("create",Model::$sql);
+        $i = $db->IntDB("create", Model::$sql);
         return $i;
     }
 
@@ -239,9 +240,9 @@ class Model
     {
         self::wl_get_class();
 //
-        $arr= (new self())->setName(self::$name);
-         (new self())->where(['id='=>$id]);
-        $info= (new self())->get();
+        $arr = (new self())->setName(self::$name);
+        (new self())->where(['id=' => $id]);
+        $info = (new self())->get();
         return $info;
 
     }
@@ -254,65 +255,53 @@ class Model
     {
         self::wl_get_class();
 //
-        $name=self::$name;
-        $db=new DB();
-        $columnArr= $db->columnDB($name);
-        $columnString=implode(",",$columnArr);
+        $name = self::$name;
+        $db = new DB();
+        $columnArr = $db->columnDB($name);
+        $columnString = implode(",", $columnArr);
 
 
+        $setInfo = "";
 
-        $setInfo="";
+        foreach ($arr as $key => $item) {
 
-        foreach ($arr as $key=>$item)
-        {
-
-            $setInfo=" $setInfo  $key = '$item' ,";
+            $setInfo = " $setInfo  $key = '$item' ,";
 
         }
 
-        $setInfo=substr($setInfo,0,strlen($setInfo)-1);
+        $setInfo = substr($setInfo, 0, strlen($setInfo) - 1);
 
-        $id=$arr["id"];
+        $id = $arr["id"];
 //        var_dump($arr);
-        Model::$sql="UPDATE  $name  SET $setInfo where id = '$id'";
+        Model::$sql = "UPDATE  $name  SET $setInfo where id = '$id'";
         echo Model::$sql;
         echo "<hr>";
 
-        $i=  $db->IntDB("update",Model::$sql);
+        $i = $db->IntDB("update", Model::$sql);
         return $i;
     }
 
-    public  static function delete($arr)
+    public static function delete($arr)
     {
         self::wl_get_class();
-        $name=self::$name;
-        $db=new DB();
+        $name = self::$name;
+        $db = new DB();
 
 
-        $column="";
-        $columnVal="";
-        foreach ($arr as $key=>$item) {
-            $column=$key;
-            $columnVal=$item;
+        $column = "";
+        $columnVal = "";
+        foreach ($arr as $key => $item) {
+            $column = $key;
+            $columnVal = $item;
             break;
         }
-        Model::$sql="DELETE FROM $name WHERE $column='$columnVal'";
+        Model::$sql = "DELETE FROM $name WHERE $column='$columnVal'";
         echo Model::$sql;
         echo "<hr>";
 
-        $i=$db->IntDB("delete",Model::$sql);
+        $i = $db->IntDB("delete", Model::$sql);
         return $i;
     }
-
-
-
-
-
-
-
-
-
-
 
 
 }
