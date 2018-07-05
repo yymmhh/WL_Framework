@@ -52,3 +52,9 @@
             $zans= Zan::delete(['id'=>130]);
     
             dd($zans);
+            
+            
+一对多
+
+            $post = User::all()->HasMany(User_Info::class, ['id', 'user_id'])->get();
+            数组第一个是本模型的主键第二个是关联的模型的外键
