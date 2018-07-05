@@ -6,6 +6,8 @@
  * Time: 16:30
  */
 namespace app\Controller;
+use app\Model\Post;
+use app\Model\User;
 use app\Model\Zan;
 use wlphp\DB\Test;
 
@@ -20,8 +22,11 @@ class IndexController
 
 
     public function find(){
-        $zans= Zan::find(1);
+//        $zans= Zan::all()->hasMany(User::class,["id","user_id"]);
+        $post=User::all()->HasOne(Zan::class,['id','user_id'])->get();
+//        $post=User::all()->get();
+//
+        dd($post);
 
-        dd($zans);
     }
 }

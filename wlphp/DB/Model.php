@@ -15,8 +15,21 @@ class Model
     public static $name;
     public static $sql ="";
     public static $namespace="";
+    public static $has_name="";
 
 
+//    public function __construct()
+//    {
+//        $namespace =get_called_class();
+//
+//        $mode_Index=strrpos($namespace,'\\');
+//        $name=substr( $namespace,$mode_Index+1);
+//
+//        self::$namespace=$namespace;
+//        self::$name=$name;
+//        var_dump($namespace);
+//        die();
+//    }
 
     /**
      * 为sql的表给名字
@@ -30,11 +43,31 @@ class Model
 //        return $this;
     }
 
+    public function HasOne($model,$where){
+
+//        self::wl_get_class();
+        $name=self::$name;
+
+
+
+//        echo "<br>";
+        $mode_Index=strrpos($model,'\\');
+        $has_name=substr( $model,$mode_Index+1);
+        self::$has_name=$has_name;
+
+        $my_parameter= $this->select_parameter($name);
+        $has_parameter= $this->select_parameter($has_name);
+
+        self::$sql="select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
+
+        return $this;
+    }
+
+
+
     //一个可有可无的连接件
     public function lian()
     {
-
-//        var_dump($this);
 
         return $this;
     }
@@ -42,11 +75,13 @@ class Model
     //得到类,为了到DB里面new 然后生成
     function wl_get_class(){
         $namespace =get_called_class();
+
         $mode_Index=strrpos($namespace,'\\');
         $name=substr( $namespace,$mode_Index+1);
 
         self::$namespace=$namespace;
         self::$name=$name;
+
     }
 
     /**
@@ -72,6 +107,22 @@ class Model
         return $this;
     }
 
+//得到sql 查询的列
+    public  function select_parameter($name){
+        $db=new DB();
+
+        $column_arr=$db->columnDB($name);
+
+        $select_can="";
+        foreach ($column_arr as $item)
+        {
+            $select_can=$select_can . " {$name}.{$item}   as '{$name}&{$item} '  , " ;
+        }
+        $select_parameter = substr($select_can,0,strlen($select_can)-2);
+
+        return $select_parameter;
+    }
+
 
     /**
      * 这个式最后的查询数据
@@ -79,10 +130,15 @@ class Model
     public  function get()
     {
 
-        echo Model::$sql;
-        echo "<hr>";
+//        echo Model::$sql;
+//        echo "<hr>";
         $db=new DB();
-        return  $db->findDB(Model::$name,Model::$sql,Model::$namespace);
+        if(self::$has_name==""){
+            return  $db->findDB(Model::$name,Model::$sql,Model::$namespace);
+        }else{
+            return  $db->findDB_has_one(Model::$name,Model::$sql,Model::$namespace,Model::$has_name);
+        }
+
 
     }
 
@@ -94,6 +150,7 @@ class Model
     {
 
         self::wl_get_class();
+//        var_dump(self::$name);
 //
         $arr= (new self())->setName(self::$name);
         return new Model();
@@ -246,6 +303,8 @@ class Model
         $i=$db->IntDB("delete",Model::$sql);
         return $i;
     }
+
+
 
 
 
