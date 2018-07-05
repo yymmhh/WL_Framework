@@ -21,3 +21,11 @@ function dd($arr){
     var_dump($arr);
 
 }
+
+function error($arr){
+    echo "<pre>";
+
+    echo "<h2 style='background-color: red;color: aliceblue;height: 100px'>{$arr} </h2>";
+    die();
+
+}
