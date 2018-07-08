@@ -20,11 +20,22 @@ class DB
      */
     public function mysqlDb()
     {
+        //导入配置不可以用require_once
+        $config= require "config/db.php";
 
-        $this->mysqli = new \mysqli('127.0.0.1', 'root', 'root', 'yii_book');
+        $host=$config['host'];
+        $user=$config['user'];
+        $name=$config['name'];
+        $password=$config['password'];
 
+//        $this->mysqli = new \mysqli('127.0.0.1', 'root', 'root', 'yii_book');
+
+        $this->mysqli = new \mysqli($host, $user, $password, $name);
+
+//        $this->mysqli->connect($host, $user, $password, $name);
         if ($this->mysqli->connect_error) {
 
+            ddd($this->mysqli->connect_error);
             die('Connect Error (' . $this->mysqli->connect_errno . ') ' . $this->mysqli->connect_error);
 
         }

@@ -6,12 +6,10 @@
  * Time: 16:30
  */
 
-namespace app\Controller;
+namespace app\index\Controller;
 
-use app\Model\Post;
-use app\Model\User;
-use app\Model\User_Info;
-use app\Model\Zan;
+use app\index\Model\User;
+use app\index\Model\User_Info;
 use wlphp\DB\Test;
 
 class IndexController

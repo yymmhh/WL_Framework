@@ -7,11 +7,17 @@
 
 访问 第一个是     控制器/方法
 
+
 控制器定义在app目录下
 
             index.php?c=index/find
 
 
+2018-7-8 加入URL优化.
+
+/模块/控制器/方法
+
+    /admin/index/index
 
 查询
 

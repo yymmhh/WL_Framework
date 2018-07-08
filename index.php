@@ -1,30 +1,21 @@
 <?php
 require_once  "autoload.php";
+require_once  "wlphp\url\URL.php";
+//$config= require_once  "config\config.php";
 
-if (empty($_GET)){
-    error("参数没有带");
-}
+$result_arr=wl_request_url();
 
-if (!array_key_exists("c", $_GET)){
-    error("格式为index.php?c=控制器/方法");
-};
+//dd($result_arr);
+$modules=$result_arr[0];       //得到模块
+$controller=$result_arr[1];  //得到控制器
+$action=$result_arr[2];         //得到方法
 
-$get=$_GET['c'];
-
-$result = explode('/', $get);
-
-$controller=$result[0];  //得到控制器
-$action=$result[1];         //得到方法
-
-
-
-
-$namespace="\app\Controller\\$controller";
+$namespace="\app\\$modules\\Controller\\$controller";
 
 $namespace=$namespace."Controller";
 
+//ddd($namespace);
 try{
-
 
     if (!class_exists($namespace)){
         error("调用的控制器不存在");
