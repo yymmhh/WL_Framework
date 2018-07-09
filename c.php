@@ -10,7 +10,7 @@ function c(){
 
 
 function config($key=null){
-    $config= require c()."\config\config.php";
+    $config= require c()."/config/config.php";
     if(empty($key)){
         return "key不存在!";
     }
