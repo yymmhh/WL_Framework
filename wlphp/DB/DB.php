@@ -21,7 +21,7 @@ class DB
     public function mysqlDb()
     {
         //导入配置不可以用require_once
-        $config= require "config/db.php";
+        $config= require c()."/config/db.php";
 
         $host=$config['host'];
         $user=$config['user'];
@@ -235,6 +235,29 @@ class DB
 
 
     }
+
+    /**
+     * 查询个数的数据库操作
+     */
+
+    public function findCountDB($name, $sql, $namespac){
+        $this->mysqlDb();
+
+        $colomArr = $this->columnDB($name);
+
+        $result = $this->mysqli->query($sql);
+        $infoArr = [];
+
+        while ($row = $result->fetch_array(MYSQLI_ASSOC)) {//mysql_fetch_array从结果集中取得一行作为关联数组或者数字数组。
+
+            $infoArr[] = $row;
+        }
+
+        return $infoArr[0];
+
+    }
+
+
 
 
     /**

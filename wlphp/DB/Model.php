@@ -25,11 +25,11 @@ class Model
     public function setName($name)
     {
 
-        Model::$name = $name;
-        Model::$sql = "select * from  $name where 1=1";
+        self::$name = $name;
+        self::$sql = "select * from  $name where 1=1";
 
-        $this->lian();
-//        return $this;
+
+        return $this;
     }
 
     public function HasOne($model, $where)
@@ -69,15 +69,9 @@ class Model
     }
 
 
-    //一个可有可无的连接件
-    public function lian()
-    {
-
-        return $this;
-    }
 
     //得到类,为了到DB里面new 然后生成
-    function wl_get_class()
+   static function wl_get_class()
     {
         $namespace = get_called_class();
 
@@ -86,6 +80,20 @@ class Model
 
         self::$namespace = $namespace;
         self::$name = $name;
+
+
+        if (!class_exists($namespace)){
+            error("调用的控制器不存在");
+        };
+
+        //判断是否存在从新定义类名
+        if (property_exists($namespace,"table_name"))
+        {
+            $db_name=new $namespace();
+            self::$name=$db_name->table_name;
+        };
+
+
 
     }
 
@@ -105,7 +113,7 @@ class Model
         }
 
 
-        Model::$sql = Model::$sql . $tempConnectionSQl;
+        self::$sql = self::$sql . $tempConnectionSQl;
 
         return $this;
     }
@@ -133,17 +141,29 @@ class Model
     public function get()
     {
 
-//        echo Model::$sql;
-//        echo "<hr>";
         $db = new DB();
         if (self::$has_name == "") {
-            return $db->findDB(Model::$name, Model::$sql, Model::$namespace);
+            return $db->findDB(self::$name, self::$sql, self::$namespace);
         } else {
-            return $db->findDB_has_many(Model::$name, Model::$sql, Model::$namespace, Model::$has_name);
+            return $db->findDB_has_many(self::$name, self::$sql, self::$namespace, self::$has_name);
         }
 
 
     }
+
+
+    /**
+     * count 查询
+     */
+    public function count(){
+        $db = new DB();
+        self::$sql= str_replace("*","count(*) as count",self::$sql);
+
+        var_dump(self::$sql);
+        return $db->findCountDB(self::$name, self::$sql, self::$namespace);
+
+    }
+
 
 
     /**
@@ -155,6 +175,7 @@ class Model
         self::wl_get_class();
 //        var_dump(self::$name);
 //
+        self::$name=strtolower(self::$name);
         $arr = (new self())->setName(self::$name);
         return new Model();
     }
@@ -167,11 +188,11 @@ class Model
      */
     public function order($column, $order = "")
     {
-        $tempConnectionSQl = Model::$sql;
+        $tempConnectionSQl = self::$sql;
 
 
         $tempConnectionSQl = $tempConnectionSQl . " ORDER BY $column $order";
-        Model::$sql = $tempConnectionSQl;
+        self::$sql = $tempConnectionSQl;
         return $this;
     }
 
@@ -185,11 +206,11 @@ class Model
     public function limt($pageIndex, $pageSize)
     {
         $pageIndex = $pageSize * ($pageIndex - 1);
-        $tempConnectionSQl = Model::$sql;
+        $tempConnectionSQl = self::$sql;
 
 
         $tempConnectionSQl = $tempConnectionSQl . " LIMIT $pageIndex , $pageSize";
-        Model::$sql = $tempConnectionSQl;
+        self::$sql = $tempConnectionSQl;
 
         return $this;
 
@@ -223,11 +244,11 @@ class Model
         $columnKeys = substr($columnKeys, 0, strlen($columnKeys) - 1);
         $columnVlaues = substr($columnVlaues, 0, strlen($columnVlaues) - 1);
 
-        Model::$sql = "insert into $name ($columnKeys) VALUES ($columnVlaues)";
-        echo Model::$sql;
+        self::$sql = "insert into $name ($columnKeys) VALUES ($columnVlaues)";
+        echo self::$sql;
         echo "<hr>";
 //        die();
-        $i = $db->IntDB("create", Model::$sql);
+        $i = $db->IntDB("create", self::$sql);
         return $i;
     }
 
@@ -273,11 +294,11 @@ class Model
 
         $id = $arr["id"];
 //        var_dump($arr);
-        Model::$sql = "UPDATE  $name  SET $setInfo where id = '$id'";
+        self::$sql = "UPDATE  $name  SET $setInfo where id = '$id'";
         echo Model::$sql;
         echo "<hr>";
 
-        $i = $db->IntDB("update", Model::$sql);
+        $i = $db->IntDB("update", self::$sql);
         return $i;
     }
 
@@ -295,11 +316,11 @@ class Model
             $columnVal = $item;
             break;
         }
-        Model::$sql = "DELETE FROM $name WHERE $column='$columnVal'";
-        echo Model::$sql;
+        self::$sql = "DELETE FROM $name WHERE $column='$columnVal'";
+        echo self::$sql;
         echo "<hr>";
 
-        $i = $db->IntDB("delete", Model::$sql);
+        $i = $db->IntDB("delete", self::$sql);
         return $i;
     }
 

@@ -59,27 +59,27 @@ function json($msg = "", $type = 1, $is_end = true){
 }
 
 
-function jsonSuccess($data = [], $message = '', $code = 0, $share = array())
-{
-    header('Content-Type: application/json');
-    $message = $message ? $message : '调用成功';
-    jsonEncode(true, $data, $message, $code, $share);
-}
-
-
-function jsonEncode($status, $data = [], $message = '', $code = 0)
-{
-
-    $status = boolval($status);
-    $data = $data ? $data : (object) array();
-    $message = strval($message);
-    $code = intval($code);
-    $result = [
-        'status' => $status,
-        'code' => $code,
-        'message' => $message,
-        'data' => $data
-    ];
-
-    echo json_encode($result);
-}
+//function jsonSuccess($data = [], $message = '', $code = 0, $share = array())
+//{
+//    header('Content-Type: application/json');
+//    $message = $message ? $message : '调用成功';
+//    jsonEncode(true, $data, $message, $code, $share);
+//}
+//
+//
+//function jsonEncode($status, $data = [], $message = '', $code = 0)
+//{
+//
+//    $status = boolval($status);
+//    $data = $data ? $data : (object) array();
+//    $message = strval($message);
+//    $code = intval($code);
+//    $result = [
+//        'status' => $status,
+//        'code' => $code,
+//        'message' => $message,
+//        'data' => $data
+//    ];
+//
+//    echo json_encode($result);
+//}

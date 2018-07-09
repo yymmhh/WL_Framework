@@ -8,8 +8,10 @@
 
 namespace app\admin\Controller;
 
+use app\index\Model\Post;
 use app\index\Model\User;
 use app\index\Model\User_Info;
+use app\index\Model\Zan;
 use wlphp\DB\Test;
 
 class IndexController
@@ -17,19 +19,18 @@ class IndexController
 
     public function __construct()
     {
-        echo __DIR__;
-
+        echo "admin";
     }
 
 
     public  function index(){
-        echo __DIR__;
+        echo config("username");
     }
 
     public function find()
     {
 //        $zans= Zan::all()->hasMany(User::class,["id","user_id"]);
-        $post = User::all()->get();
+        $post = Post::all()->count();
 //        $post=User::all()->get();
 //
         dd($post);

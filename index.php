@@ -1,20 +1,23 @@
 <?php
+
+header("Content-type: text/html; charset=utf-8");
 require_once  "autoload.php";
 require_once  "wlphp\url\URL.php";
+require_once  "c.php";
 //$config= require_once  "config\config.php";
 
-$result_arr=wl_request_url();
+$result_arr=wl_request_url();  //得到URL参数的数组
 
 //dd($result_arr);
 $modules=$result_arr[0];       //得到模块
 $controller=$result_arr[1];  //得到控制器
 $action=$result_arr[2];         //得到方法
+$controller=ucwords($controller);  //url控制器首字母转成大写
 
 $namespace="\app\\$modules\\Controller\\$controller";
 
 $namespace=$namespace."Controller";
 
-//ddd($namespace);
 try{
 
     if (!class_exists($namespace)){
@@ -33,5 +36,3 @@ var_dump("发生异常!");
 
 die();
 }
-
-//new \app\Controller\index();
