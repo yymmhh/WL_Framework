@@ -40,6 +40,7 @@ function error($arr){
 
 
 function json($msg = "", $type = 1, $is_end = true){
+    header('Content-Type: application/json');
     $json['status'] = $type;
     if (is_array($msg)) {
         foreach ($msg as $key => $v) {

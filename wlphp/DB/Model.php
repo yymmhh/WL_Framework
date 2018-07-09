@@ -159,7 +159,6 @@ class Model
         $db = new DB();
         self::$sql= str_replace("*","count(*) as count",self::$sql);
 
-        var_dump(self::$sql);
         return $db->findCountDB(self::$name, self::$sql, self::$namespace);
 
     }
