@@ -2,8 +2,9 @@
 
 header("Content-type: text/html; charset=utf-8");
 require_once  "autoload.php";
-require_once  "wlphp\url\URL.php";
 require_once  "c.php";
+require_once  c()."/wlphp/url/URL.php";
+
 //$config= require_once  "config\config.php";
 
 $result_arr=wl_request_url();  //得到URL参数的数组
