@@ -32,3 +32,32 @@
     }
 
 
+    
+    function request($params){
+        $arr = explode("&",$params);
+        $last=[];
+        foreach ($arr as $item){
+            $temp = explode("=",$item);
+            $last[$temp[0]]=$temp[1];
+        }
+
+        return $last;
+    }
+
+    function get($key){
+        $result_arr=wl_request_url();
+        $url=request($result_arr[3]);
+        if(empty($url[$key])){
+            return null;
+        }
+        return $url[$key];
+    }
+
+    function post($key){
+        $url=$_POST;
+        if(empty($url[$key])){
+            return null;
+        }
+        return $url[$key];
+    }
+
