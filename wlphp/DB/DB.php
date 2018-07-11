@@ -21,7 +21,7 @@ class DB
     public function mysqlDb()
     {
         //导入配置不可以用require_once
-        $config= require "config/db.php";
+        $config= require c()."/config/db.php";
 
         $host=$config['host'];
         $user=$config['user'];
@@ -83,8 +83,11 @@ class DB
      */
     public function columnDB($name)
     {
+//        ddd($name);
         $this->mysqlDb();
+        $name=strtolower($name);
         $filedSql = "SHOW FIELDS FROM $name";
+
         $filed = $this->mysqli->query($filedSql);
 
         $colomArr = [];
@@ -97,10 +100,11 @@ class DB
     }
 
 //查询一对多不重复的主列
-    public function my($name)
+    public function my($name,$where)
     {
-        $this->mysqlDb();
-        $sql = "select * from {$name}";
+
+        $sql = "select * from {$name} where 1=1 {$where}";
+//        ddd($sql);
         $result = $this->mysqli->query($sql);
         $infoArr = [];
 
@@ -112,10 +116,19 @@ class DB
     }
 
 
-    public function findDB_has_many($name, $sql, $namespace, $has_name)
+    public function findDB_has_many($name, $sql, $namespace, $has_name_arr,$where)
     {
-        $new_arr = $this->my($name);
+
         $this->mysqlDb();
+
+        $new_arr="";
+        $my_xin_arr=$this->my($name,$where);
+
+
+        foreach ($has_name_arr as $item) {
+            $new_arr[] = $this->my($item,$where);
+
+        }
 
 
         $result = $this->mysqli->query($sql);
@@ -127,6 +140,8 @@ class DB
         }
 
 
+
+
         $my_arr = [];
 
         foreach ($infoArr as $item) {
@@ -136,17 +151,19 @@ class DB
 
                 $mode_Index = strrpos($key, '&');
 
-                $mode_name = substr($key, 0, $mode_Index);
-                $mode_value = substr($key, $mode_Index + 1);
+                $mode_name = trim(substr($key, 0, $mode_Index));
+                $mode_value = trim(substr($key, $mode_Index + 1));
 
                 if ($mode_name == $name) {
                     $temp_my_arr[$mode_value] = $itemtwo;
 
                 }
-
-                if ($mode_name == $has_name) {
-                    $temp_my_arr[$has_name][$mode_value] = $itemtwo;
+                foreach ($has_name_arr as $itemthree) {
+                    if ($mode_name == $itemthree) {
+                        $temp_my_arr[$itemthree][$mode_value] = $itemtwo;
+                    }
                 }
+
 
             }
 
@@ -155,24 +172,39 @@ class DB
 
 
         }
+//        ddd($my_arr);
+
+
+
+
         //双从循环实现一对多
-        foreach ($new_arr as &$item) {
+        //第一层是select 本身 的所有信息
+        foreach ($my_xin_arr as &$item) {
+            $count=0;
+            //这是sql查询出来的所有的信息
             foreach ($my_arr as $itemtwo) {
 
-                if ($item['id'] == $itemtwo['id ']) {            //判断的是没有重复的主列和查询出关联的主列
+                //如果本身的id=sql查询出来的id
+                if ($item['id'] == $itemtwo['id']) {            //判断的是没有重复的主列和查询出关联的主列
                     //然后拿到,加到主列里面
-                    if ($itemtwo[$has_name]["id "] != null) {
-                        $item[$has_name][] = $itemtwo[$has_name];
+                            //关联的类的名称
+                    foreach ($has_name_arr as $itemthree) {
+                        if ($itemtwo[$itemthree]["id"] != null) {
+                            $item[$itemthree][$itemtwo[$itemthree]["id"]] = $itemtwo[$itemthree];
 
-                    } else {
-                        $item[$has_name] = null;
-                    };
+                        } else {
+                            $item[$itemthree] = null;
+                        };
+                    }
+
                 }
             }
 
+//            ddd($my_xin_arr);
+
         }
 
-        return $new_arr;
+        return $my_xin_arr;
     }
 
     /**
@@ -236,6 +268,29 @@ class DB
 
     }
 
+    /**
+     * 查询个数的数据库操作
+     */
+
+    public function findCountDB($name, $sql, $namespac){
+        $this->mysqlDb();
+
+        $colomArr = $this->columnDB($name);
+
+        $result = $this->mysqli->query($sql);
+        $infoArr = [];
+
+        while ($row = $result->fetch_array(MYSQLI_ASSOC)) {//mysql_fetch_array从结果集中取得一行作为关联数组或者数字数组。
+
+            $infoArr[] = $row;
+        }
+
+        return $infoArr[0];
+
+    }
+
+
+
 
     /**
      *查询的数据库操作
@@ -246,6 +301,7 @@ class DB
     public function findDB($name, $sql, $namespace)
     {
         $this->mysqlDb();
+
 
         $colomArr = $this->columnDB($name);
 

@@ -8,6 +8,7 @@
 
 namespace app\index\Controller;
 
+use app\index\Model\Post;
 use app\index\Model\User;
 use app\index\Model\User_Info;
 use wlphp\DB\Test;
@@ -25,10 +26,10 @@ class IndexController
     public function find()
     {
 //        $zans= Zan::all()->hasMany(User::class,["id","user_id"]);
-        $post = User::all()->HasMany(User_Info::class, ['id', 'user_id'])->get();
+        $post = User::all()->HasMany(Post::class, ['id', 'user_id'])->get();
 //        $post=User::all()->get();
 //
-        dd($post);
+        jsonSuccess($post);
 
     }
 }

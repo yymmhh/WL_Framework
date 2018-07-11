@@ -17,6 +17,8 @@ class Model
     public static $sql = "";
     public static $namespace = "";
     public static $has_name = "";
+    public static $where = "";
+    public static $has_name_arr = "";
 
 
     /**
@@ -25,11 +27,11 @@ class Model
     public function setName($name)
     {
 
-        Model::$name = $name;
-        Model::$sql = "select * from  $name where 1=1";
+        self::$name = $name;
+        self::$sql = "select * from  $name where 1=1";
 
-        $this->lian();
-//        return $this;
+
+        return $this;
     }
 
     public function HasOne($model, $where)
@@ -45,39 +47,59 @@ class Model
         $my_parameter = $this->select_parameter($name);
         $has_parameter = $this->select_parameter($has_name);
 
-        self::$sql = "select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
+        self::$sql = "select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]} where 1=1 ";
 
         return $this;
     }
 
 
-    public function HasMany($model, $where)
+    public function HasMany($arr)
     {
 
-        $name = self::$name;
+        $my_parameter = $this->select_parameter(self::$name);
+        $temp_sql="select {$my_parameter} ";
 
-        $mode_Index = strrpos($model, '\\');
-        $has_name = substr($model, $mode_Index + 1);
-        self::$has_name = $has_name;
+        $has_name_arr=""; //拿到所有的关联的模型
+        $where_arr="";
+        foreach($arr as $item){
+            $mode_Index = strrpos($item[0], '\\');
+            $has_name = substr($item[0], $mode_Index + 1);
+            $has_name=strtolower($has_name); //转小写
+            $has_name_arr[]=$has_name;
+            $item[1]["name"]=$has_name;
+            $where_arr[]=$item[1];
 
-        $my_parameter = $this->select_parameter($name);
-        $has_parameter = $this->select_parameter($has_name);
+        }
+        self::$has_name_arr=$has_name_arr;
+        $has_parameter_arr="";      //所有关联的sql查询参数
+        foreach($has_name_arr as $item){
 
-        self::$sql = "select {$my_parameter} , {$has_parameter} from {$name} left  join {$has_name} on {$name}.{$where[0]} = {$has_name}.{$where[1]}";
+            $has_parameter= $this->select_parameter($item);
+            $has_parameter_arr[]=$has_parameter;
+            $temp_sql=$temp_sql . "," .$has_parameter;
+
+        }
+        $name=self::$name;
+        $temp_sql=$temp_sql . " from {$name} ";
+        //开始加入where 的sql语句
+        foreach ($where_arr as $item) {
+            $temp_sql=$temp_sql . "left  join {$item['name']} on {$name}.{$item[0]} = {$item['name']}.{$item[1]}  ";
+
+        }
+
+        $temp_sql=$temp_sql . " where 1=1 ";
+
+        self::$sql=$temp_sql;
+
+        self::$has_name = $has_name_arr[0];
 
         return $this;
     }
 
 
-    //一个可有可无的连接件
-    public function lian()
-    {
-
-        return $this;
-    }
 
     //得到类,为了到DB里面new 然后生成
-    function wl_get_class()
+   static function wl_get_class()
     {
         $namespace = get_called_class();
 
@@ -85,7 +107,22 @@ class Model
         $name = substr($namespace, $mode_Index + 1);
 
         self::$namespace = $namespace;
-        self::$name = $name;
+        self::$name = strtolower($name);
+//        $has_name=strtolower($has_name);
+
+
+        if (!class_exists($namespace)){
+            error("调用的控制器不存在");
+        };
+
+        //判断是否存在从新定义类名
+        if (property_exists($namespace,"table_name"))
+        {
+            $db_name=new $namespace();
+            self::$name=$db_name->table_name;
+        };
+
+
 
     }
 
@@ -105,7 +142,9 @@ class Model
         }
 
 
-        Model::$sql = Model::$sql . $tempConnectionSQl;
+        self::$sql = self::$sql . $tempConnectionSQl;
+
+        self::$where=$tempConnectionSQl;
 
         return $this;
     }
@@ -132,18 +171,31 @@ class Model
      */
     public function get()
     {
+//            dd(self::$sql);
 
-//        echo Model::$sql;
-//        echo "<hr>";
         $db = new DB();
         if (self::$has_name == "") {
-            return $db->findDB(Model::$name, Model::$sql, Model::$namespace);
+            return $db->findDB(self::$name, self::$sql, self::$namespace);
         } else {
-            return $db->findDB_has_many(Model::$name, Model::$sql, Model::$namespace, Model::$has_name);
+
+            return $db->findDB_has_many(self::$name, self::$sql, self::$namespace, self::$has_name_arr,self::$where);
         }
 
 
     }
+
+
+    /**
+     * count 查询
+     */
+    public function count(){
+        $db = new DB();
+        self::$sql= str_replace("*","count(*) as count",self::$sql);
+
+        return $db->findCountDB(self::$name, self::$sql, self::$namespace);
+
+    }
+
 
 
     /**
@@ -153,8 +205,8 @@ class Model
     {
 
         self::wl_get_class();
-//        var_dump(self::$name);
-//
+
+        self::$name=strtolower(self::$name);
         $arr = (new self())->setName(self::$name);
         return new Model();
     }
@@ -167,11 +219,11 @@ class Model
      */
     public function order($column, $order = "")
     {
-        $tempConnectionSQl = Model::$sql;
+        $tempConnectionSQl = self::$sql;
 
 
         $tempConnectionSQl = $tempConnectionSQl . " ORDER BY $column $order";
-        Model::$sql = $tempConnectionSQl;
+        self::$sql = $tempConnectionSQl;
         return $this;
     }
 
@@ -185,11 +237,11 @@ class Model
     public function limt($pageIndex, $pageSize)
     {
         $pageIndex = $pageSize * ($pageIndex - 1);
-        $tempConnectionSQl = Model::$sql;
+        $tempConnectionSQl = self::$sql;
 
 
         $tempConnectionSQl = $tempConnectionSQl . " LIMIT $pageIndex , $pageSize";
-        Model::$sql = $tempConnectionSQl;
+        self::$sql = $tempConnectionSQl;
 
         return $this;
 
@@ -223,11 +275,11 @@ class Model
         $columnKeys = substr($columnKeys, 0, strlen($columnKeys) - 1);
         $columnVlaues = substr($columnVlaues, 0, strlen($columnVlaues) - 1);
 
-        Model::$sql = "insert into $name ($columnKeys) VALUES ($columnVlaues)";
-        echo Model::$sql;
-        echo "<hr>";
+        self::$sql = "insert into $name ($columnKeys) VALUES ($columnVlaues)";
+//        echo self::$sql;
+//        echo "<hr>";
 //        die();
-        $i = $db->IntDB("create", Model::$sql);
+        $i = $db->IntDB("create", self::$sql);
         return $i;
     }
 
@@ -273,11 +325,11 @@ class Model
 
         $id = $arr["id"];
 //        var_dump($arr);
-        Model::$sql = "UPDATE  $name  SET $setInfo where id = '$id'";
-        echo Model::$sql;
-        echo "<hr>";
+        self::$sql = "UPDATE  $name  SET $setInfo where id = '$id'";
+//        echo Model::$sql;
+//        echo "<hr>";
 
-        $i = $db->IntDB("update", Model::$sql);
+        $i = $db->IntDB("update", self::$sql);
         return $i;
     }
 
@@ -295,11 +347,11 @@ class Model
             $columnVal = $item;
             break;
         }
-        Model::$sql = "DELETE FROM $name WHERE $column='$columnVal'";
-        echo Model::$sql;
-        echo "<hr>";
+        self::$sql = "DELETE FROM $name WHERE $column='$columnVal'";
+//        echo self::$sql;
+//        echo "<hr>";
 
-        $i = $db->IntDB("delete", Model::$sql);
+        $i = $db->IntDB("delete", self::$sql);
         return $i;
     }
 
