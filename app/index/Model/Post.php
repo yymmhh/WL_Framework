@@ -6,6 +6,7 @@ namespace app\index\Model;
  class Post extends Model
 {
 
+    public $table_name="admin_authority";
 
 
 }
