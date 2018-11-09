@@ -1,6 +1,6 @@
 # WL_Framework
 
-<h2>自己手写的一个仿造Laravel和ThinkPHP的 MC 框架没有V😂</h2>
+<h2>自己手写的一个仿造Laravel和ThinkPHP的 MC 框架没有V</h2>
   
 
 2018-7-4 加入命名空间.
