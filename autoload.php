@@ -16,6 +16,8 @@ function classLoader($class)
 spl_autoload_register('classLoader');
 
 function dd($arr){
+    //不输出图片等等的
+    header('Content-Type: application/json');
     echo "<pre>";
 
     var_dump($arr);

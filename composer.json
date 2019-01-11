@@ -1,0 +1,26 @@
+{
+    "name": "hyt/test",
+    "authors": [
+        {
+            "name": "yymmhh",
+            "email": "yymmhh@126.com"
+        }
+    ],
+    "require": {
+	"phpoffice/phpword": "v0.13.*",
+        "yansongda/pay": "^2.6",
+        "mpdf/mpdf": "^7.1"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
+    },
+
+    "autoload":{
+        "psr-0":{
+            "ClassTest\\Lib":"lib/"
+        }
+    }
+}

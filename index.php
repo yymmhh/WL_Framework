@@ -1,13 +1,13 @@
 <?php
+//打开错误
+ini_set("display_errors","On");
+error_reporting(E_ALL);
 header('Access-Control-Allow-Origin:*');
 header("Content-type: text/html; charset=utf-8");
 require_once  "autoload.php";
 require_once  "c.php";
+require_once  "./vendor/autoload.php";
 require_once  c()."/wlphp/url/URL.php";
-
-require_once  c()."/wlphp/vorder/function.php";
-
-//$config= require_once  "config\config.php";
 
 $result_arr=wl_request_url();  //得到URL参数的数组
 
@@ -26,6 +26,7 @@ try{
 
     if (!class_exists($namespace)){
         error("调用的控制器不存在");
+        dd("使用的控制器为".$namespace);
     };
 
     $con=new $namespace();

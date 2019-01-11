@@ -27,10 +27,11 @@ class DB
         $user=$config['user'];
         $name=$config['name'];
         $password=$config['password'];
+        $port=$config['port'];
 
 //        $this->mysqli = new \mysqli('127.0.0.1', 'root', 'root', 'yii_book');
 
-        $this->mysqli = new \mysqli($host, $user, $password, $name);
+        $this->mysqli = new \mysqli($host, $user, $password, $name,$port);
 
 //        $this->mysqli->connect($host, $user, $password, $name);
         if ($this->mysqli->connect_error) {

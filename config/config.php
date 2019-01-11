@@ -8,7 +8,8 @@
 
 return
 [
-    'id'=>1,
-    'username'=>"园开园",
+    'debug'         =>true,
+    'id'            =>1,
+    'username'      =>"园开园",
 
 ];

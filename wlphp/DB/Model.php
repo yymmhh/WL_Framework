@@ -19,16 +19,30 @@ class Model
     public static $has_name = "";
     public static $where = "";
     public static $has_name_arr = "";
+    public static $debug = "";
 
+    public  function __construct()
+    {
+        //查看是否开始debug,开启就打印sql
+        $debug=config('debug');
+        self::$debug=$debug;
+    }
 
     /**
      * 为sql的表给名字
+     * 是否是join
+     *
      */
-    public function setName($name)
+    public function setName($name,$Join=false)
     {
 
         self::$name = $name;
-        self::$sql = "select * from  $name where 1=1";
+        if($Join==true){
+            self::$sql = "select * from  $name ";
+        }else{
+            self::$sql = "select * from  $name where 1=1 ";
+
+        }
 
 
         return $this;
@@ -133,6 +147,11 @@ class Model
 
     public function where($sql)
     {
+        //判断有没有 where 1=1
+        $isHaveWhere = strstr(self::$sql, 'where');
+        if(empty($isHaveWhere)){
+            self::$sql.=" where 1=1 ";
+        }
 
         $tempConnectionSQl = "";
 
@@ -171,8 +190,10 @@ class Model
      */
     public function get()
     {
-//            dd(self::$sql);
-
+        //不为调试模式就打印sql
+        if(!empty(self::$debug)){
+            dd(self::$sql);
+        }
         $db = new DB();
         if (self::$has_name == "") {
             return $db->findDB(self::$name, self::$sql, self::$namespace);
@@ -189,6 +210,10 @@ class Model
      * count 查询
      */
     public function count(){
+        //不为调试模式就打印sql
+        if(!empty(self::$debug)){
+            dd(self::$sql);
+        }
         $db = new DB();
         self::$sql= str_replace("*","count(*) as count",self::$sql);
 
@@ -209,6 +234,24 @@ class Model
         self::$name=strtolower(self::$name);
         $arr = (new self())->setName(self::$name);
         return new Model();
+    }
+
+    /**
+     * @param $sql
+     * @return $this
+     * join 原生查询
+     */
+    public function join($sql){
+        if(empty(self::$name)){
+            self::wl_get_class();
+
+            self::$name=strtolower(self::$name);
+            $arr = (new self())->setName(self::$name,true);
+        }
+
+        self::$sql.=" ".$sql." ";
+
+        return $this;
     }
 
 
